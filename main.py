@@ -1,6 +1,5 @@
 __author__ = 'kyhwana'
 
-#TODO: output MD5/SHA1/other hashes of output sentences
 #TODO: randomly generate sentances, specify how many to generate.
 #TODO: add max output length. Make max output length either cut off words or not output sentences more than <x>
 #TODO: Output to stdout vs output to file.
@@ -9,7 +8,7 @@ import sys
 import argparse
 import string
 import itertools
-
+import hashlib
 
 
 
@@ -28,17 +27,25 @@ def makesentence(words):
             sentence = sentence + word
         else:
             sentence = sentence + word + modifier
+    if hashalgo:
+        return hashsentence(sentence) + hasspasswordseperator + sentence
+    else:
+        return sentence
 
-    return(sentence)
+def hashsentence(sentence):
+    hashin = hashlib.new(hashalgo[0])
+    hashin.update(sentence.encode())
+    return hashin.hexdigest()
 
 debug=0
 
 parser = argparse.ArgumentParser(description="XKCD style password generator")
-parser.add_argument('-d', help="dict <filename of dictionary>", required=True)
-parser.add_argument('-wc', help="Number of words in sentence", required=False, default='4')
-parser.add_argument('-m', help="Modifier", required=False, default='')
+parser.add_argument('-d', help="<filename of dictionary>", required=True)
+parser.add_argument('-wc', help="<Number of words in sentence>", required=False, default='4')
+parser.add_argument('-m', help="<Modifier>", required=False, default='')
 parser.add_argument('-r', help="Repeating words ", required=False, dest='repeats',action='store_true')
 parser.add_argument('-nr', help="No repeating words ", required=False, dest='repeats',action='store_false')
+parser.add_argument('-hash', help="Hash with <algorithm>", required=False, nargs=1)
 parser.set_defaults(repeats=False)
 
 #pull the arguments from the parser
@@ -47,10 +54,18 @@ dictionaryfile = opts.pop('d')
 wordcount = opts.pop('wc')
 modifier = opts.pop('m')
 repeatwords = opts.pop('repeats')
+hashalgo = opts.pop('hash')
+
+#hash/password seperator. This is only used if we are hashing.
+hasspasswordseperator = ":"
+if debug:
+    print(hashlib.algorithms_available)
+    print(hashlib.algorithms_guaranteed)
 
 if debug: print(dictionaryfile)
 if debug: print(wordcount)
 if debug: print(repeatwords)
+if debug: print(hashalgo)
 #pull all the words from our dictionary file, strip the CR/LF's off the word, bung them into "words" as a list.
 words = [line.strip() for line in open(dictionaryfile)]
 
@@ -70,9 +85,4 @@ for nwords in range(0,int(wordcount)):
         else:
             print(makesentence(word))
 
-#for firstword in words:
-#    wordlist = []
-#    wordlist.append(firstword)
-    #We already have the first word, so wordcount-1
-#    for wordlistcreatecount in range(0,wordcount-1):
 

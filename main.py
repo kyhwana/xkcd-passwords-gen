@@ -9,7 +9,7 @@ import argparse
 import string
 import itertools
 import hashlib
-
+import io
 
 
 def makesentence(words):
@@ -46,6 +46,7 @@ parser.add_argument('-m', help="<Modifier>", required=False, default='')
 parser.add_argument('-r', help="Repeating words ", required=False, dest='repeats',action='store_true')
 parser.add_argument('-nr', help="No repeating words ", required=False, dest='repeats',action='store_false')
 parser.add_argument('-hash', help="Hash with <algorithm>", required=False, nargs=1)
+parser.add_argument('-o',help="Output file <file>", required=False)
 parser.set_defaults(repeats=False)
 
 #pull the arguments from the parser
@@ -55,6 +56,7 @@ wordcount = opts.pop('wc')
 modifier = opts.pop('m')
 repeatwords = opts.pop('repeats')
 hashalgo = opts.pop('hash')
+outputfile = opts.pop('o')
 
 #hash/password seperator. This is only used if we are hashing.
 hasspasswordseperator = ":"
@@ -68,6 +70,14 @@ if debug: print(repeatwords)
 if debug: print(hashalgo)
 #pull all the words from our dictionary file, strip the CR/LF's off the word, bung them into "words" as a list.
 words = [line.strip() for line in open(dictionaryfile)]
+if outputfile:
+    try:
+        with open(outputfile, "w") as outputfilehandle:
+            pass
+    except IOError as e:
+        print("IOERROR ", e)
+        exit()
+    outputfilehandle = open(outputfile, "w")
 
 for nwords in range(0,int(wordcount)):
     for word in itertools.product(words,repeat=int(wordcount)):
@@ -83,6 +93,12 @@ for nwords in range(0,int(wordcount)):
             #Do nothing. We don't want repeated words.
             if debug: print("Doing nothing, not allowed repeating words.")
         else:
-            print(makesentence(word))
+            if outputfile:
+                #We need the \n if we want each sentence on a different line :|
+                outputfilehandle.write(makesentence(word) + "\n")
+            else:
+                print(makesentence(word))
+if outputfile:
+    outputfilehandle.close()
 
 

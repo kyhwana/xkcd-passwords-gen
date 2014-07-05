@@ -85,6 +85,7 @@ if outputfile:
         exit()
     outputfilehandle = open(outputfile, "w")
 
+#this is much faster..
 for nwords in range(0,int(wordcount)):
 
     if (repeatwords):

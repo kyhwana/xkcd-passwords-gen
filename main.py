@@ -37,6 +37,12 @@ def hashsentence(sentence):
     hashin.update(sentence.encode())
     return hashin.hexdigest()
 
+def outputsentence(sentence):
+       if outputfile:
+                #We need the \n if we want each sentence on a different line :|
+            outputfilehandle.write(makesentence(sentence) + "\n")
+       else:
+            print(makesentence(sentence))
 debug=0
 
 parser = argparse.ArgumentParser(description="XKCD style password generator")
@@ -80,24 +86,16 @@ if outputfile:
     outputfilehandle = open(outputfile, "w")
 
 for nwords in range(0,int(wordcount)):
-    for word in itertools.product(words,repeat=int(wordcount)):
-        if (debug): print(word)
-        #Lets see if we have any repeated words.
-        repeatedwords = False
-        for checkword in word:
-            checkwordcount = max(Counter(word).values())
-            if debug: print("checkwordcount=%s",checkwordcount)
-            if checkwordcount > 1:
-                repeatedwords = True
-        if repeatwords == False and repeatedwords == True:
-            #Do nothing. We don't want repeated words.
-            if debug: print("Doing nothing, not allowed repeating words.")
-        else:
-            if outputfile:
-                #We need the \n if we want each sentence on a different line :|
-                outputfilehandle.write(makesentence(word) + "\n")
-            else:
-                print(makesentence(word))
+
+    if (repeatwords):
+        for word in itertools.product(words,repeat=int(wordcount)):
+
+            outputsentence(word)
+    else:
+        for word in itertools.permutations(words, int(wordcount)):
+             outputsentence(word)
+
+
 if outputfile:
     outputfilehandle.close()
 

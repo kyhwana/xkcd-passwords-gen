@@ -10,7 +10,7 @@ import string
 import itertools
 import hashlib
 import io
-
+from collections import Counter
 
 def makesentence(words):
     mswordcount = len(words)
@@ -85,7 +85,7 @@ for nwords in range(0,int(wordcount)):
         #Lets see if we have any repeated words.
         repeatedwords = False
         for checkword in word:
-            checkwordcount = word.count(checkword)
+            checkwordcount = max(Counter(word).values())
             if debug: print("checkwordcount=%s",checkwordcount)
             if checkwordcount > 1:
                 repeatedwords = True
